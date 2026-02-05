@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Prompt Judge</title>
+    <style>
+        body{
+            font-family:Arial,Helvetica,sans-serif;
+            background:#eef2f7;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            margin:0;
+        }
+        .app{
+            background:white;
+            padding:30px;
+            border-radius:12px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.1);
+            width:480px;
+            text-align:center;
+        }
+        textarea{
+            width:100%;
+            height:110px;
+            padding:10px;
+            font-size:14px;
+            margin-top:10px;
+        }
+        button{
+            margin-top:12px;
+            padding:10px 16px;
+            font-size:14px;
+            cursor:pointer;
+            border:none;
+            border-radius:6px;
+            background:#4a90e2;
+            color:white;
+        }
+        #result{
+            margin-top:18px;
+            text-align:left;
+            white-space:pre-wrap;
+            font-size:14px;
+        }
+        #challenge{
+            font-weight:bold;
+            margin-bottom:8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h2>🎯 AI Prompt Challenge</h2>
+        <div id="challenge">Click "New Challenge"</div>
+
+        <textarea id="promptInput" placeholder="Write your prompt here..."></textarea>
+
+        <button id="newBtn">New Challenge</button>
+        <button id="submitBtn">Submit Prompt</button>
+
+        <div id="result"></div>
+    </div>
+
+<script>
+const challengeBox=document.getElementById("challenge");
+const promptInput=document.getElementById("promptInput");
+const resultBox=document.getElementById("result");
+
+document.getElementById("newBtn").onclick=async()=>{
+    challengeBox.textContent="Generating challenge... 🎯";
+    resultBox.textContent="";
+    promptInput.value="";
+
+    const res=await fetch("http://localhost:3000/api/challenge");
+    const data=await res.json();
+    challengeBox.textContent=data.challenge||"Failed to load challenge";
+};
+
+document.getElementById("submitBtn").onclick=async()=>{
+    const prompt=promptInput.value.trim();
+    const challenge=challengeBox.textContent;
+
+    if(!prompt){
+        alert("Write a prompt first!");
+        return;
+    }
+
+    resultBox.textContent="AI is judging your prompt... 🤖";
+
+    const res=await fetch("http://localhost:3000/api/judge",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({challenge,prompt})
+    });
+
+    const data=await res.json();
+    resultBox.textContent=data.feedback||"Error getting feedback";
+};
+</script>
+</body>
+</html>
